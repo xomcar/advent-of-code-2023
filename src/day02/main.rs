@@ -4,7 +4,7 @@ const PART_1_GREEN: u32 = 13;
 const PART_1_BLUE: u32 = 14;
 
 fn main() {
-    if let Ok(file) = fs::read_to_string("data/input.txt") {
+    if let Ok(file) = fs::read_to_string("data/day02.txt") {
         let (mut part_1_sum, mut part_2_sum) = (0u32, 0u32);
         for line in file.lines() {
             let game = get_game(line);

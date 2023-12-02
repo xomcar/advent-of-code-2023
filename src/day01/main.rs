@@ -1,15 +1,15 @@
 use std::{fs, process};
 
 fn main() {
-    if let Ok(file) = fs::read_to_string("data/input.txt") {
+    if let Ok(file) = fs::read_to_string("data/day01.txt") {
         let mut part_1_sum = 0;
         let mut part_2_sum = 0;
         for line in file.lines() {
             part_1_sum += calibration_part_1(line);
             part_2_sum += calibration_part_2(line);
         }
-        println!("Part 1 sum is: {}", part_1_sum);
-        println!("Part 2 sum is: {}", part_2_sum);
+        println!("Part 1 ➡️ {}", part_1_sum);
+        println!("Part 2 ➡️ {}", part_2_sum);
         process::exit(0);
     } else {
         eprintln!("Could not load file data/input.txt");

@@ -11,6 +11,6 @@ fn main() {
 }
 
 
-fn part1(s : &str) {
-   
+fn part1(s : &str) -> u32 {
+    0
 }

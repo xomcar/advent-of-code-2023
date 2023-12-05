@@ -55,7 +55,7 @@ fn part_1_and_2(s: &str) -> (u32, u32) {
                     sum += number
                 }
                 // update gears
-                for gear in gears.clone() {
+                for &gear in &gears {
                     gears_dict.entry(gear).or_insert(Vec::new()).push(number)
                 }
                 // reset data

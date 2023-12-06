@@ -10,108 +10,94 @@ fn main() {
     }
 }
 
-#[derive(Debug)]
+fn part_1(s: &str) -> u64 {
+    // read seeds
+    let mut blocks = s.split("\n\n");
+    let seeds: Vec<u64> = blocks
+        .nth(0)
+        .unwrap()
+        .split_whitespace()
+        .filter_map(|t| t.parse().ok())
+        .collect();
+    // read maps
+    let maps: Vec<Vec<Map>> = blocks
+        .map(|block| {
+            block
+                .lines()
+                .filter_map(|line| Map::from_str(line))
+                .collect()
+        })
+        .collect();
+
+    // solve maps for each seed and save minimum
+    let mut min_loc = u64::MAX;
+    for seed in seeds {
+        // traverse each block
+        let mut res = seed;
+        for block in &maps {
+            // check each map and update value
+            for map in block {
+                let new_res = map.convert(res);
+                if new_res != res {
+                    res = new_res;
+                    break;
+                } else {
+                    res = new_res;
+                }
+            }
+        }
+        // update new mimimal location (if any)
+        if res < min_loc {
+            min_loc = res;
+        }
+    }
+
+    min_loc
+}
+
+fn part_2(_: &str) -> u64 {
+    0
+}
+
 struct Map {
-    input_start: u64,
-    output_start: u64,
+    start_input: u64,
+    start_output: u64,
     size: u64,
 }
 
 impl Map {
-    fn from_vec(i: Vec<u64>) -> Map {
-        Map {
-            output_start: i[0],
-            input_start: i[1],
-            size: i[2],
+    fn from_str(s: &str) -> Option<Map> {
+        let tokens: Vec<_> = s
+            .split_whitespace()
+            .filter_map(|token| token.parse().ok())
+            .collect();
+        if tokens.len() != 3 {
+            return None;
+        } else {
+            Some(Map {
+                start_output: tokens[0],
+                start_input: tokens[1],
+                size: tokens[2],
+            })
         }
     }
-}
-
-#[derive(Debug)]
-struct Converter {
-    maps: Vec<Map>,
-}
-
-impl Converter {
-    fn convert_forward(&self, n: u64) -> u64 {
-        println!("Converting input {}", n);
-        for map in &self.maps {
-            let end = map.input_start + map.size;
-            println!(
-                "Map: [{},{}) -> [{},{})",
-                map.input_start,
-                map.input_start + map.size,
-                map.output_start,
-                map.output_start + map.size
-            );
-            if n >= map.input_start && n < end {
-                // conversion is allowed
-                let offset = map.output_start as i64 - map.input_start as i64;
-                println!(
-                    "Input is within range, output will be {} = {} + {}",
-                    n as i64 + offset,
-                    n,
-                    offset,
-                );
-                return (n as i64 + offset) as u64;
-            } else {
-                println!("Input is not within range")
-            }
-        }
-        // if no valid range is found, return original number
-        n
-    }
-
-    fn from_maps(maps: Vec<Map>) -> Converter {
-        Converter { maps: maps }
-    }
-}
-
-fn part_1(s: &str) -> u64 {
-    // get initial seeds
-    let inputs: Vec<u64> = s
-        .lines()
-        .nth(0)
-        .unwrap()
-        .split_whitespace()
-        .filter_map(|c| c.parse::<u64>().ok())
-        .collect();
-    // build chain of converters
-    let blocks: Vec<_> = s
-        .split("\n\n")
-        .filter(|block| block.contains("map"))
-        .collect();
-    let mut converters = Vec::new();
-    for block in blocks {
-        let mut maps: Vec<Map> = Vec::new();
-        for line in block.lines() {
-            let values: Vec<_> = line
-                .split_whitespace()
-                .filter_map(|token| token.parse::<u64>().ok())
-                .collect();
-            if values.len() != 3 {
-                continue;
-            }
-            println!("Loaded map {} {} {}", values[0], values[1], values[2]);
-            maps.push(Map::from_vec(values));
-        }
-        converters.push(Converter::from_maps(maps))
-    }
-    let mut min = u64::MAX;
-    for seed in &inputs {
-        let mut res = *seed;
-        for converter in &converters {
-            res = converter.convert_forward(res);
-        }
-        if res < min {
-            min = res;
+    fn convert(&self, x: u64) -> u64 {
+        // println!(
+        //     "input {} - range [{},{}) -> [{},{})",
+        //     x,
+        //     self.start_input,
+        //     self.start_input + self.size,
+        //     self.start_output,
+        //     self.start_output + self.size,
+        // );
+        if x >= self.start_input && x < self.start_input + self.size {
+            // println!("output {}", self.start_output + (x - self.start_input));
+            self.start_output + (x - self.start_input)
+        } else {
+            // println!("output due to out of bounds {}", x);
+            x
         }
     }
-    min
-}
-
-fn part_2(_: &str) -> u64 {
-    2
 }
 
 #[cfg(test)]
@@ -120,7 +106,7 @@ mod tests {
     use crate::part_1;
 
     #[test]
-    fn converter() {
+    fn check() {
         let input = "\
 seeds: 79 14 55 13
 

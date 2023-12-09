@@ -37,7 +37,7 @@ fn part_1(s: &str) -> u64 {
         for block in &maps {
             // check each map and update value
             for map in block {
-                let new_res = map.convert(res);
+                let new_res = map.forward(res);
                 if new_res != res {
                     res = new_res;
                     break;
@@ -55,7 +55,35 @@ fn part_1(s: &str) -> u64 {
     min_loc
 }
 
-fn part_2(_: &str) -> u64 {
+fn part_2(s: &str) -> u64 {
+    // read seeds intervals
+    let mut blocks = s.split("\n\n");
+    let seeds = blocks
+        .nth(0)
+        .unwrap()
+        .split_whitespace()
+        .filter_map(|t| t.parse().ok())
+        .collect::<Vec<u64>>();
+
+    // expand seeds
+    let mut seed_ranges = Vec::new();
+    let mut i = 0;
+    while i < seeds.len() {
+        seed_ranges.push((seeds[i], seeds[i + 1]));
+        i += 2;
+    }
+
+    // read maps (reversed)
+    let mut maps: Vec<Vec<Map>> = blocks
+        .map(|block| {
+            block
+                .lines()
+                .filter_map(|line| Map::from_str(line))
+                .collect()
+        })
+        .collect();
+    maps.reverse();
+
     0
 }
 
@@ -81,20 +109,17 @@ impl Map {
             })
         }
     }
-    fn convert(&self, x: u64) -> u64 {
-        // println!(
-        //     "input {} - range [{},{}) -> [{},{})",
-        //     x,
-        //     self.start_input,
-        //     self.start_input + self.size,
-        //     self.start_output,
-        //     self.start_output + self.size,
-        // );
+    fn forward(&self, x: u64) -> u64 {
         if x >= self.start_input && x < self.start_input + self.size {
-            // println!("output {}", self.start_output + (x - self.start_input));
             self.start_output + (x - self.start_input)
         } else {
-            // println!("output due to out of bounds {}", x);
+            x
+        }
+    }
+    fn _backward(&self, x: u64) -> u64 {
+        if x >= self.start_output && x < self.start_output + self.size {
+            self.start_input + (x - self.start_output)
+        } else {
             x
         }
     }
